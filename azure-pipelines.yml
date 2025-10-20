@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  name: default   # your self-hosted agent pool
+  name: Default   # your self-hosted agent pool
 
 steps:
 # 1️⃣ Verify Python installation
@@ -18,22 +18,30 @@ steps:
     pip install -r requirements.txt
   displayName: 'Install dependencies'
 
-# 3️⃣ Run tests using pytest
+# 3️⃣ Run tests with pytest
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'Run pytest'
+    python -m pip install pytest pytest-azurepipelines
+    python -m pytest
+  displayName: 'Run tests'
 
-# 4️⃣ Optional: Build a Python package
+# 4️⃣ Optional: Build Python package (only if setup.py exists)
 - script: |
-    python setup.py sdist bdist_wheel
-  displayName: 'Build Python package'
+    if exist setup.py (
+        python setup.py sdist bdist_wheel
+    ) else (
+        echo "setup.py not found, skipping package build"
+    )
+  displayName: 'Build Python package (optional)'
 
-# 5️⃣ Optional: Publish package to PyPI (if needed)
+# 5️⃣ Optional: Publish package to PyPI (only if dist folder exists)
 # - task: TwineAuthenticate@1
 #   inputs:
-#     artifactFeed: 'YOUR_FEED_NAME'
+#     artifactFeed: 'sand'
 # - script: |
-#     pip install twine
-#     twine upload dist/*
-#   displayName: 'Publish package'
+#     if exist dist (
+#         pip install twine
+#         twine upload dist/*
+#     ) else (
+#         echo "No dist folder found, skipping publish"
+#     )
+#   displayName: 'Publish package (optional)'
