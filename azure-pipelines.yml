@@ -1,36 +1,36 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
 
 pool:
-  name: Default  # your self-hosted agent pool
+  name: Default
 
 variables:
-  azureSubscription: 'myserv'  # Azure DevOps Service Connection name
-  webAppName: 'pys'       # Name of your Azure Web App
-  resourceGroup: 'pythonR' # Resource Group of your Web App
-  packagePath: '$(System.DefaultWorkingDirectory)'  # Path to deploy
+  pythonVersion: '3.12'
 
 steps:
-# 1️⃣ Verify Python installation
-- script: |
-    python --version
-    where python
-    pip --version
-  displayName: 'Verify Python 3.12'
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(pythonVersion)'
 
-# 2️⃣ Install dependencies
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
   displayName: 'Install dependencies'
 
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+    replaceExistingArchive: true
 
-# 4️⃣ Deploy to Azure Web App
 - task: AzureWebApp@1
   inputs:
-    azureSubscription: $(azureSubscription)
-    appType: 'webApp'
-    appName: $(webAppName)
-    package: $(packagePath)
-    startupCommand: 'python -m uvicorn controller.EmployeeController:obj --host 0.0.0.0 --port $PORT'
-  displayName: 'Deploy to Azure Web App'
+    azureSubscription: 'myserv'
+    appType: 'webAppLinux'
+    appName: 'my-fastapi-apps'
+    package: '$(Build.ArtifactStagingDirectory)/app.zip'
+    startUpCommand: 'bash startup.sh'
