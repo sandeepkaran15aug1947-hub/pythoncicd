@@ -6,7 +6,7 @@ pool:
 
 variables:
   azureSubscription: 'myserv'  # Azure DevOps Service Connection name
-  webAppName: 'pythondeploy'       # Name of your Azure Web App
+  webAppName: 'pys'       # Name of your Azure Web App
   resourceGroup: 'pythonR' # Resource Group of your Web App
   packagePath: '$(System.DefaultWorkingDirectory)'  # Path to deploy
 
