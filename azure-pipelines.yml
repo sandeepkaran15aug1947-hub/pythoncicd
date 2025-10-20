@@ -4,20 +4,22 @@ trigger:
       - main
 
 pool:
-  name: Default
+  name: 'Default'
 
 variables:
-  pythonVersion: '3.12'
+  appName: 'my-fastapi-apps'  # Replace with your Azure Web App name
+  azureSubscription: 'myserv'  # Replace with your service connection name
 
 steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(pythonVersion)'
-
 - script: |
-    python -m pip install --upgrade pip
+    sudo apt update
+    sudo apt install -y python3.12 python3.12-venv python3.12-dev
+    python3.12 -m venv venv
+    source venv/bin/activate
+    pip install --upgrade pip
     pip install -r requirements.txt
-  displayName: 'Install dependencies'
+  displayName: 'Install Python 3.12 and dependencies'
+
 
 - task: ArchiveFiles@2
   inputs:
@@ -26,11 +28,13 @@ steps:
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
     replaceExistingArchive: true
+  displayName: 'Archive app for deployment'
 
 - task: AzureWebApp@1
   inputs:
-    azureSubscription: 'myserv'
+    azureSubscription: '$(azureSubscription)'
     appType: 'webAppLinux'
-    appName: 'my-fastapi-apps'
+    appName: '$(appName)'
     package: '$(Build.ArtifactStagingDirectory)/app.zip'
     startUpCommand: 'bash startup.sh'
+  displayName: 'Deploy to Azure Web App'
