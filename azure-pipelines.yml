@@ -2,7 +2,13 @@ trigger:
 - main
 
 pool:
-  name: Default   # your self-hosted agent pool
+  name: Default  # your self-hosted agent pool
+
+variables:
+  azureSubscription: 'myserv'  # Azure DevOps Service Connection name
+  webAppName: 'pythondeploy'       # Name of your Azure Web App
+  resourceGroup: 'pythonR' # Resource Group of your Web App
+  packagePath: '$(System.DefaultWorkingDirectory)'  # Path to deploy
 
 steps:
 # 1️⃣ Verify Python installation
@@ -18,7 +24,6 @@ steps:
     pip install -r requirements.txt
   displayName: 'Install dependencies'
 
-#
 
 # 4️⃣ Optional: Build Python package (only if setup.py exists)
 - script: |
@@ -29,15 +34,11 @@ steps:
     )
   displayName: 'Build Python package (optional)'
 
-# 5️⃣ Optional: Publish package to PyPI (only if dist folder exists)
-# - task: TwineAuthenticate@1
-#   inputs:
-#     artifactFeed: 'sand'
-# - script: |
-#     if exist dist (
-#         pip install twine
-#         twine upload dist/*
-#     ) else (
-#         echo "No dist folder found, skipping publish"
-#     )
-#   displayName: 'Publish package (optional)'
+# 5️⃣ Deploy to Azure Web App
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: $(azureSubscription)
+    appType: 'webApp'
+    appName: $(webAppName)
+    package: $(packagePath)
+  displayName: 'Deploy to Azure Web App'
