@@ -32,7 +32,7 @@ steps:
 # 5️⃣ Optional: Publish package to PyPI (if needed)
 # - task: TwineAuthenticate@1
 #   inputs:
-#     artifactFeed: 'YOUR_FEED_NAME'
+#     artifactFeed: 'sand'
 # - script: |
 #     pip install twine
 #     twine upload dist/*
