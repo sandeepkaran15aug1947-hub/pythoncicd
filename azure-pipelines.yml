@@ -1,0 +1,36 @@
+trigger:
+- main
+
+pool:
+  name: Default  # your self-hosted agent pool
+
+variables:
+  azureSubscription: 'myserv'  # Azure DevOps Service Connection name
+  webAppName: 'pys'       # Name of your Azure Web App
+  resourceGroup: 'pythonR' # Resource Group of your Web App
+  packagePath: '$(System.DefaultWorkingDirectory)'  # Path to deploy
+
+steps:
+# 1️⃣ Verify Python installation
+- script: |
+    python --version
+    where python
+    pip --version
+  displayName: 'Verify Python 3.12'
+
+# 2️⃣ Install dependencies
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+
+# 4️⃣ Deploy to Azure Web App
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: $(azureSubscription)
+    appType: 'webApp'
+    appName: $(webAppName)
+    package: $(packagePath)
+    startupCommand: 'python -m uvicorn controller.EmployeeController:obj --host 0.0.0.0 --port $PORT'
+  displayName: 'Deploy to Azure Web App'
