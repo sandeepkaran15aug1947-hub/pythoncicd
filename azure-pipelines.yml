@@ -1,28 +1,39 @@
-# Python package
-# Create and test a Python package on multiple Python versions.
-# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
 trigger:
 - main
 
 pool:
-  name: default
-
-
+  name: default   # your self-hosted agent pool
 
 steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.12'
-  displayName: '3.12'
+# 1️⃣ Verify Python installation
+- script: |
+    python --version
+    where python
+    pip --version
+  displayName: 'Verify Python 3.12'
 
+# 2️⃣ Upgrade pip and install dependencies
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
   displayName: 'Install dependencies'
 
+# 3️⃣ Run tests using pytest
 - script: |
     pip install pytest pytest-azurepipelines
     pytest
-  displayName: 'pytest'
+  displayName: 'Run pytest'
+
+# 4️⃣ Optional: Build a Python package
+- script: |
+    python setup.py sdist bdist_wheel
+  displayName: 'Build Python package'
+
+# 5️⃣ Optional: Publish package to PyPI (if needed)
+# - task: TwineAuthenticate@1
+#   inputs:
+#     artifactFeed: 'YOUR_FEED_NAME'
+# - script: |
+#     pip install twine
+#     twine upload dist/*
+#   displayName: 'Publish package'
